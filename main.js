@@ -63,3 +63,50 @@ function drawDot(point, label, isRed = false) {
 function linearInterpolation(start, end, t) {
     return start + (end - start) * t;
 }
+
+function getIntersection(A, B, C, D) {
+    /*
+        Ix = Ax + (Bx - Ax)t = Cx + (Dx - Cx)u
+        Iy = Ay + (By - Ay)t = Cy + (Dy - Cy)u
+
+        First equation:
+        Ax + (Bx - Ax)t = Cx + (Dx - Cx)u | -Cx to both sides
+        (Ax - Cx) + (Bx - Ax)t = (Dx - Cx)u | / (Dx - Cx) might be 0 if the segment is vertical
+
+        Second ecuation:
+        Ay + (By - Ay)t = Cy + (Dy - Cy)u | -Cy to both sides
+        (Ay - Cy) + (By - Ay)t = (Dy - Cy)u | / (Dy - Cy) might be 0 if the segment is horizontal
+                                            / * (Dx - Cx) to both sides
+
+        (Dx - Cx) * (Ay - Cy) + (Dx - Cx) * (By - Ay)t = (Dy - Cy) * (Dx - Cx)u | (Dx - Cx)u can be replace by (Ax - Cx) + (Bx - Ax)t  as it is in the equation above
+        (Dx - Cx) * (Ay - Cy) + (Dx - Cx) * (By - Ay)t = (Dy - Cy) * (Ax - Cx) + (Dy - Cy) * (Bx - Ax)t | - (Dy - Cy) * (Ax - Cx) to both sides
+                                                                                                        | - (Dx - Cx) * (By - Ay)t to both sides
+
+        (Dx - Cx) * (Ay - Cy) - (Dy - Cy) * (Ax - Cx) = (Dy - Cy) * (Bx - Ax)t - (Dx - Cx) * (By - Ay)t | factor out t
+        (Dx - Cx) * (Ay - Cy) - (Dy - Cy) * (Ax - Cx) = t * ((Dy - Cy) * (Bx - Ax) - (Dx - Cx) * (By - Ay)) | divide by that side to get the value of t
+
+        Final equation:
+        t = ((Dx - Cx) * (Ay - Cy) - (Dy - Cy) * (Ax - Cx)) / ((Dy - Cy) * (Bx - Ax) - (Dx - Cx) * (By - Ay))
+
+        Top part = (Dx - Cx) * (Ay - Cy) - (Dy - Cy) * (Ax - Cx)
+        Bottom part = (Dy - Cy) * (Bx - Ax) - (Dx - Cx) * (By - Ay)
+        t = top / bottom
+    */
+    const tTop = (D.x - C.x) * (A.y - C.y) - (D.y - C.y) * (A.x - C.x);
+    const uTop = (C.y - A.y) * (A.x - B.x) - (C.x - A.x) * (A.y - B.y);
+    const bottom = (D.y - C.y) * (B.x - A.x) - (D.x - C.x) * (B.y - A.y);
+
+    if (bottom != 0) {
+        const t = tTop / bottom;
+        const u = uTop / bottom;
+        if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+            return {
+                x: linearInterpolation(A.x, B.x, t),
+                y: linearInterpolation(A.y, B.y, t),
+                offset: t
+            }
+        }
+    }
+
+    return null;
+}
