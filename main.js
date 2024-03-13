@@ -7,10 +7,23 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 const ctx = canvas.getContext('2d');
 
-let t = -1;
+const mouse = { x: 0, y: 0 };
+document.onmousemove = (event) => {
+    mouse.x = event.x;
+    mouse.y = event.y;
+}
+
+let angle = 0;
 animate();
 
 function animate() {
+    const radius = 50;
+    A.x = mouse.x + Math.cos(angle) * radius;
+    A.y = mouse.y + Math.sin(angle) * radius;
+    B.x = mouse.x + Math.cos(angle + Math.PI) * radius;
+    B.y = mouse.y + Math.sin(angle + Math.PI) * radius;
+    angle += 0.02;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawLine(A, B);
     drawLine(C, D);
@@ -20,20 +33,10 @@ function animate() {
     drawDot(C, 'C');
     drawDot(D, 'D');
 
-    const M = {
-        x: linearInterpolation(A.x, B.x, t),
-        y: linearInterpolation(A.y, B.y, t),
+    const I = getIntersection(A, B, C, D);
+    if (I) {
+        drawDot(I, 'I', true);
     }
-
-    const N = {
-        x: linearInterpolation(C.x, D.x, t),
-        y: linearInterpolation(C.y, D.y, t),
-    }
-    
-    drawDot(M, 'M', t < 0 || t > 1);
-    drawDot(N, 'N', t < 0 || t > 1);
-
-    t += 0.005;
 
     requestAnimationFrame(animate);
 }
